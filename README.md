@@ -42,6 +42,19 @@ Change the previously created binary to the HDF5 binary data format.
 ```
 This will save the model under the name `newweights9i.hdf5`.
 
+### save the hyperparameter
+Save the hyperparameter from the `newweights9i.hdf5` file to the C file.
+```bash
+% cd training
+% ./dump_rnn.py newweights9i.hdf5 ../src/rnn_data.c ../src/rnn_data.h
+```
+
+### recompile demo
+Recompile the demo based on the newly written `rnn_data.c`.
+```bash
+% make clean && make
+```
+
 ## demo
 While it is meant to be used as a library, a simple command-line tool is
 provided as an example. It operates on RAW 16-bit (machine endian) mono
