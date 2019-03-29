@@ -11,7 +11,7 @@ from keras import backend as K
 import sys
 import re
 import numpy as np
-import rnn_train
+from rnn_train import msse, my_crossentropy, mycost, WeightClip
 
 def printVector(f, vector, name):
     v = np.reshape(vector, (-1));
