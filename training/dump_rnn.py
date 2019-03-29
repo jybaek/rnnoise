@@ -11,6 +11,7 @@ from keras import backend as K
 import sys
 import re
 import numpy as np
+import rnn_train
 
 def printVector(f, vector, name):
     v = np.reshape(vector, (-1));
@@ -57,7 +58,7 @@ def mean_squared_sqrt_error(y_true, y_pred):
     return K.mean(K.square(K.sqrt(y_pred) - K.sqrt(y_true)), axis=-1)
 
 
-model = load_model(sys.argv[1], custom_objects={'msse': mean_squared_sqrt_error, 'mean_squared_sqrt_error': mean_squared_sqrt_error, 'my_crossentropy': mean_squared_sqrt_error, 'mycost': mean_squared_sqrt_error, 'WeightClip': foo})
+model = load_model(sys.argv[1], custom_objects={'msse': msse, 'mean_squared_sqrt_error': mean_squared_sqrt_error, 'my_crossentropy': my_crossentropy, 'mycost': mycost, 'WeightClip': WeightClip})
 
 weights = model.get_weights()
 
