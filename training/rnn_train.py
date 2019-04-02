@@ -42,23 +42,6 @@ if __name__ == '__main__':
     constraint = WeightClip(0.499)
 
     print('Build model...')
-    # ================================================================
-    """
-    main_input = Input(shape=(None, 42), name='main_input')
-    tmp = Dense(24, activation='tanh', name='input_dense', kernel_constraint=constraint, bias_constraint=constraint)(main_input)
-    vad_gru = GRU(24, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='vad_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint)(tmp)
-    vad_output = Dense(1, activation='sigmoid', name='vad_output', kernel_constraint=constraint, bias_constraint=constraint)(vad_gru)
-    noise_input = keras.layers.concatenate([tmp, vad_gru, main_input])
-    noise_gru = GRU(48, activation='relu', recurrent_activation='sigmoid', return_sequences=True, name='noise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint)(noise_input)
-    denoise_input = keras.layers.concatenate([vad_gru, noise_gru, main_input])
-
-    denoise_gru = GRU(96, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='denoise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint)(denoise_input)
-
-    denoise_output = Dense(22, activation='sigmoid', name='denoise_output', kernel_constraint=constraint, bias_constraint=constraint)(denoise_gru)
-
-    model = Model(inputs=main_input, outputs=[denoise_output, vad_output])
-    """
-    # ================================================================
     main_input = tf.keras.layers.Input(shape=(None, 42), name='main_input')
     input_dense = tf.keras.layers.Dense(24, activation='tanh', name='input_dense', kernel_constraint=constraint, bias_constraint=constraint)(main_input)
     vad_gru = tf.keras.layers.GRU(24, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='vad_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint)(input_dense)
@@ -69,12 +52,10 @@ if __name__ == '__main__':
     denoise_gru = tf.keras.layers.GRU(96, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='denoise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint)(denoise_input)
     denoise_output = tf.keras.layers.Dense(22, activation='sigmoid', name='denoise_output', kernel_constraint=constraint, bias_constraint=constraint)(denoise_gru)
     model = tf.keras.models.Model(inputs=main_input, outputs=[denoise_output, vad_output])
-    # ================================================================
 
     model.compile(loss=[mycost, my_crossentropy],
                   metrics=[msse],
                   optimizer='adam', loss_weights=[10, 0.5])
-
 
     model.summary()
     batch_size = 32
