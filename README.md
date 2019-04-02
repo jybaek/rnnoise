@@ -21,7 +21,7 @@ Compile first as follows:
 % ./compile.sh
 ```
 
-train denoise.
+train denoise. If you want to learn various noise, you only need to modify a very small part of the source code. But I will not mention it here separately.
 ```bash
 % ./denoise_training <speech> <noise> <output denoised>
 ...
