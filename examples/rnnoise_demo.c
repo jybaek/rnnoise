@@ -28,6 +28,7 @@
 #include "rnnoise.h"
 
 #define FRAME_SIZE 480
+#define ADD_WAVE_HEADER 0
 
 int main(int argc, char **argv) {
   int i;
@@ -42,6 +43,18 @@ int main(int argc, char **argv) {
   }
   f1 = fopen(argv[1], "r");
   fout = fopen(argv[2], "w");
+
+#if ADD_WAVE_HEADER
+  int channel = 2;
+  int bitspersample = 16;
+  int samplerate = 48000;
+  long byteRate = channel * samplerate * bitspersample / 8;
+
+  fseek(f1, 0, SEEK_END);
+  long fileLength = ftell(f1);
+  fseek(f1, 0, SEEK_SET);
+#endif
+
   while (1) {
     short tmp[FRAME_SIZE];
     fread(tmp, sizeof(short), FRAME_SIZE, f1);
@@ -50,6 +63,33 @@ int main(int argc, char **argv) {
     rnnoise_process_frame(st, x, x);
     for (i=0;i<FRAME_SIZE;i++) tmp[i] = x[i];
     if (!first) fwrite(tmp, sizeof(short), FRAME_SIZE, fout);
+#if ADD_WAVE_HEADER
+    else {
+      short header[FRAME_SIZE];
+      sprintf(header, "%c%c%c%c%c%c%c%c" 
+          "%c%c%c%c%c%c%c%c"
+          "%c%c%c%c%c%c"
+          "%c%c" // channel, 0
+          "%c%c%c%c" // samplerate
+          "%c%c%c%c" // byteRate
+          "%c%c" // channel * bitspersample / 8, 0
+          "%c%c" // bitspersample, 0
+          "%c%c%c%c" // data
+          "%c%c%c%c", // pcmsize
+          'R', 'I', 'F', 'F', (char)(fileLength&0xff), (char)((fileLength>>8)&0xff), (char)((fileLength>>16)&0xff), (char)((fileLength>>24)&0xff),
+          'W', 'A', 'V', 'E', 'f', 'm', 't', ' ',
+          16, 0, 0, 0, 1, 0,
+          (char)channel, 0, // channel
+          (char)(samplerate&0xff), (char)((samplerate>>8)&0xff), (char)((samplerate>>16)&0xff), (char)((samplerate>>24)&0xff), //samplerate
+          (char)(byteRate&0xff), (char)((byteRate>>8)&0xff), (char)((byteRate>>16)&0xff), (char)((byteRate>>24)&0xff), //byteRate
+          (char)(channel * bitspersample / 8), 0,
+          bitspersample, 0,
+          'd', 'a', 't', 'a',
+          (char)(fileLength&0xff), (char)((fileLength>>8)&0xff), (char)((fileLength>>16)&0xff), (char)((fileLength>>24)&0xff)
+          );
+      fwrite(header, sizeof(char), FRAME_SIZE, fout);
+    }
+#endif
     first = 0;
   }
   rnnoise_destroy(st);
